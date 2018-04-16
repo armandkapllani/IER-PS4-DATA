@@ -418,8 +418,8 @@ Z_i <- 1/Z
 diag(Z_i) <- 0
 
 # Let P be the log population vector. (380x1)
-P <- log(population$population)[1:380]
-estimation$P <- log(population$population)[1:380]
+P <- matrix(log(estimation$population), ncol = 1)
+estimation$P <- P
 
 # Let S be the south vector. (380x1)
 S <- estimation$south
