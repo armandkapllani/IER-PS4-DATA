@@ -189,10 +189,21 @@ summary(reg11)
 rank_reg11 <- cbind(setnames(data.table(head(substr(names(coef(reg11)), 17, 20), -2)),'V1', 'cty_code'), 
                     setnames(data.table(head(coef(summary(reg11))[,1], -2)), 'V1', 'est'))
 
-# Sort them 
+# Sort them highest to lowest. 
 rank_reg11[order(-rank(est), cty_code)][1:3]
+
+# Three highest quality producers. 
+#1. United Kingdom 
+#2. France
+#3. Canada 
+
+# Sort them lowest to highest. 
 rank_reg11[order(rank(est), cty_code)][1:3]
 
+# Three lowest quality producers. 
+#1. Iceland
+#2. New Zealand
+#3. Ireland
 
 # Commodity: 2501000000 [controlling for population]
 reg21 <- ivreg(log(share) ~ 0 + factor(cty_code) + log(pop) + log(price) | . -log(price) + IV, data = dta[commodity == 2501000000])
@@ -201,10 +212,22 @@ summary(reg21)
 rank_reg21 <- cbind(setnames(data.table(head(substr(names(coef(reg21)), 17, 20), -2)),'V1', 'cty_code'), 
                     setnames(data.table(head(coef(summary(reg21))[,1], -2)), 'V1', 'est'))
 
-# Sort them 
+# Sort them highest to lowest. 
 rank_reg21[order(-rank(est), cty_code)][1:3]
+
+# Three highest quality producers. 
+#1. Palau
+#2. Aruba
+#3. Bahamas
+
+
+# Sort them from lowest to highest. 
 rank_reg21[order(rank(est), cty_code)][1:3]
 
+# Three lowest quality producers. 
+#1. India
+#2. China
+#3. Indonesia
 
 # Commodity: 8711200090 [controlling for population]
 reg31 <- ivreg(log(share) ~ 0 + factor(cty_code) + log(pop) + log(price) | . -log(price) + IV, data = dta[commodity == 8711200090])
@@ -214,9 +237,26 @@ summary(reg31)
 rank_reg31 <- cbind(setnames(data.table(head(substr(names(coef(reg31)), 17, 20), -2)),'V1', 'cty_code'), 
                     setnames(data.table(head(coef(summary(reg31))[,1], -2)), 'V1', 'est'))
 
-# Sort them 
+# Sort them from highest to lowest. 
 rank_reg31[order(-rank(est), cty_code)][1:3]
+
+# Three highest quality producers. 
+#1. Austria
+#2. New Zealand
+#3. Ireland
+
+# Sort them from lowest to highest.
 rank_reg31[order(rank(est), cty_code)][1:3]
+
+# Three lowest quality producers. 
+#1. India
+#2. China
+#3. Indonesia 
+
+
+# Yes they appear to be more or less reasonable. The results are consistent with the 
+# Khandelwal (2010) model's prediction that more advanced countries will manufacture 
+# higher quality products. 
 
 
 #--------------------------------------------------------------------------------------------#
@@ -291,6 +331,14 @@ dta3 <- merge(dta3, good3, by = 'cty_code')
 reg_good3 <- lm(est3 ~ log(price), data = dta3)
 summary(reg_good3)
 
+
+# We see that the estimated coefficient for the motorcycle commodity is the only one that has a 
+# positive value which shows that higher quality varieties are more expensive. While for commo-
+# dity salt and atlantic salmon the estimated coefficient on log(price) is negative, and 
+# especially the estimated coefficient for salt is very high in absolute value. However they are
+# statistically insignificant. 
+
+
 #------------------------------------------------------------------------------------------------# 
 # 5. Regress the quality estimates you get in (3) on the respective countries’ income per capita #
 # (in logs) using the file gdp capita.csv for each product category separately. Do richer        #
@@ -309,6 +357,14 @@ summary(reg_gdp_pc2)
 
 reg_gdp_pc3 <- lm(est3 ~ log(gdp_per_capita), data = dta_gdp_pc3)
 summary(reg_gdp_pc3)
+
+
+# Yes as we can see from the regression results richer countries produce higher-quality varieties.  
+# The estimated coefficient on gdp per capita for commodity motorcycles is positive (9.069) showing 
+# that as GDP per capita increases that will lead to an increase in the production of high quality 
+# products. Also the estimated coefficient on gdp per capita for coomodity salt is also 
+# positive. While the estimated coefficient on gdp per capita for the atlantic salmon is statistically
+# insignificant. 
 
 #-------------------------------------------------------------------------------------------------------#
 # 6. Download data from county business patterns (https://www.census.gov/programs- surveys/cbp.html) on #
@@ -375,19 +431,42 @@ ql_motor
 
 # Import penetration from China for salt: 2501000000
 
-import_salt_from_china <- dta[cty_code == 5700 & commodity == 2501000000 & year == 2014][,'gross_value']
-usa_gdp <- gdp[cty_code == 842][,'gdp_2014']
+# We use two ways:
+  
+  #1. ratio of import_share to total_import_share. 
+  #2. production
 
-IP_China_salt <- import_salt_from_china/(usa_gdp*1000)
-setnames(IP_China_salt, 'gross_value', 'IP')
+# From Comtrade Database [commodity: 2501000000]
+# Imports of USA from China of salt: 2,761,215
+# Total imports of USA for salt: 764,576,158
+
+IP_China_salt <- 2761215/764576158
 IP_China_salt
 
 # Import penetration from China for motorcycles: 8711200090 
 
-import_motor_from_china <- dta[cty_code == 5700 & commodity == 8711200090 & year == 2014][,'gross_value']
-IP_China_motor <- import_motor_from_china/(usa_gdp*1000)
-setnames(IP_China_motor, 'gross_value', 'IP')
+# From Comtrade Database [commodity: 8711200090]
+# Import of USA from China: 43,571,377
+# Total imports of USA for motorcycles: 297,291,468
+
+IP_China_motor <- 43571377/297291468
 IP_China_motor
+
+# Another method: import_salt_from_china/ (import_salt_from_china + production_salt_usa - usa_export_to_china_salt)
+
+# USA production of salt: $24,212,000       (BEA: GDP by Industry, using NAICS)
+# USA export of salt to China: $16,352,890  (Comtrade Dataset)
+# USA import of salt from China: 2,761,215  (Comtrade Dataset)
+
+IP_China_salt_a <- 2761215/(2761215 + 24212000 - 16352890)
+IP_China_salt_a 
+
+# USA production of motorcycles: $6,460,000
+# USA export of motorcycles to China: $1,077,916
+# USA import of motorcycles from China: $43,571,377
+
+IP_China_motor_a <- 43571377/(43571377 + 6460000 - 1077916)
+IP_China_motor_a
 
 #-------------#
 # ENTRY GAMES #
@@ -557,8 +636,8 @@ estimation[max_vector == 1][,"County"]
 # Lets check if this vector is the same as our supremum vector 
 summary(max_vector == DU)
 
-# So in this case the supremum that we found before is the combinations
-# vector that maximizes our profits. 
+# So in this case the supremum that we found before is the combinations vector that maximizes 
+# our profits. 
 
 #------------------------------------------------------------------------------------------------#
 # 5. The profit function above assumes that Wal-Mart’s profits are lower in the south. This will #
@@ -566,11 +645,11 @@ summary(max_vector == DU)
 #    describe briefly how you would estimate the true coefficient on South.                      #
 #------------------------------------------------------------------------------------------------#
 
+# This part is described in the pdf. (R markdown)
 
-
-#--------------------------------------#
-# Some extra work for no extra points. #
-#--------------------------------------#
+#----------------------------------------#
+# Some extra work for no extra points :) #
+#----------------------------------------#
 #----------------------------------------------------------------------------------------#
 # I Love for-loops, so this was my first solution for finding the infimum and supremum.  #
 # Not very elegant though when compared to the previous one but it produces the same     # 
