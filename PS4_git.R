@@ -429,43 +429,40 @@ ql_salt
 ql_motor <- max(dta3$est3) - min(dta3$est3)
 ql_motor
 
+# Import penetrations.
 # Import penetration from China for salt: 2501000000
 
-# We use two ways:
-  
-  #1. ratio of import_share to total_import_share. 
-  #2. production
+import_usa_china_salt <- PS3_data[year==2014 & commodity == 2501000000 &  cty_code == 5700][,'gross_value']
+import_usa_world_salt <- sum(PS3_data[year==2014 & commodity == 2501000000][,'gross_value'])
 
-# From Comtrade Database [commodity: 2501000000]
-# Imports of USA from China of salt: 2,761,215
-# Total imports of USA for salt: 764,576,158
-
-IP_China_salt <- 2761215/764576158
+IP_China_salt <- (import_usa_china_salt/import_usa_world_salt)*100
+setnames(IP_China_salt, 'gross_value', 'IP')
 IP_China_salt
 
 # Import penetration from China for motorcycles: 8711200090 
 
-# From Comtrade Database [commodity: 8711200090]
-# Import of USA from China: 43,571,377
-# Total imports of USA for motorcycles: 297,291,468
+import_usa_china_motor <- PS3_data[year==2014 & commodity == 8711200090 &  cty_code == 5700][,'gross_value']
+import_usa_world_motor <- sum(PS3_data[year==2014 & commodity == 8711200090][,'gross_value'])
 
-IP_China_motor <- 43571377/297291468
+IP_China_motor <- (import_usa_china_motor/import_usa_world_motor)*100
+setnames(IP_China_motor, 'gross_value', 'IP')
 IP_China_motor
 
 # Another method: import_salt_from_china/ (import_salt_from_china + production_salt_usa - usa_export_to_china_salt)
+# For this method we use Comtrade data and BEA GDP by Industry. 
 
 # USA production of salt: $24,212,000       (BEA: GDP by Industry, using NAICS)
-# USA export of salt to China: $16,352,890  (Comtrade Dataset)
-# USA import of salt from China: 2,761,215  (Comtrade Dataset)
+# USA export of salt to China: $15,804,069  (BEA dataset)
 
-IP_China_salt_a <- 2761215/(2761215 + 24212000 - 16352890)
+IP_China_salt_a <- (import_usa_china_salt/(import_usa_china_salt + 24212000 - 15804069))*100
+setnames(IP_China_salt_a, 'gross_value', 'IP')
 IP_China_salt_a 
 
 # USA production of motorcycles: $6,460,000
 # USA export of motorcycles to China: $1,077,916
-# USA import of motorcycles from China: $43,571,377
 
-IP_China_motor_a <- 43571377/(43571377 + 6460000 - 1077916)
+IP_China_motor_a <- (import_usa_china_motor/(import_usa_china_motor + 6460000 - 1077916))*100
+setnames(IP_China_motor_a, 'gross_value', 'IP')
 IP_China_motor_a
 
 #-------------#
@@ -645,7 +642,11 @@ summary(max_vector == DU)
 #    describe briefly how you would estimate the true coefficient on South.                      #
 #------------------------------------------------------------------------------------------------#
 
+
+
 # This part is described in the pdf. (R markdown)
+
+
 
 #----------------------------------------#
 # Some extra work for no extra points :) #
